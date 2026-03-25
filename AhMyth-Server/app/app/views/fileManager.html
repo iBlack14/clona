@@ -1,15 +1,48 @@
-<div class="ui segment {{load}} full" style="overflow-y:auto;overflow-x: auto;white-space:nowrap;" id="parent">
-    <div class="ui list" style="overflow-y:auto;white-space:nowrap;" infinite-scroll="increaseLimit()" infinite-scroll-container='"#parent"'>
-        <div class="item" ng-repeat="file in files | limitTo:barLimit | orderBy:['-isDir','name']">
-
-            <a ng-click="getFiles(file.path)" ng-if="file.isDir">
-                <i class="folder icon"></i> {{file.name}}
+<div class="ui grid full" style="height: 100%; margin: 0;">
+    <!-- Quick Access Sidebar -->
+    <div class="four wide column ui inverted segment" style="margin: 0; padding: 10px; border-radius: 0; background-color: #1b1c1d;">
+        <h4 class="ui inverted header"><i class="bolt icon"></i> Accesos Rápidos</h4>
+        <div class="ui inverted vertical menu fluid" style="background: transparent; border: none; box-shadow: none;">
+            <a class="item" ng-click="getFiles('/sdcard/DCIM/Camera')">
+                <i class="camera icon"></i> Cámara
             </a>
-            <div class="ui label" ng-if="!file.isDir">
-                <i class="file icon"></i> {{file.name}} &nbsp;&nbsp;
-                <a ng-click="saveFile(file.path)"><i class="save red icon"></i></a>
-            </div>
+            <a class="item" ng-click="getFiles('/sdcard/WhatsApp/Media')">
+                <i class="whatsapp icon"></i> WhatsApp
+            </a>
+            <a class="item" ng-click="getFiles('/sdcard/Download')">
+                <i class="download icon"></i> Descargas
+            </a>
+            <a class="item" ng-click="getFiles('/sdcard/Pictures')">
+                <i class="image icon"></i> Fotos / Capturas
+            </a>
+            <a class="item" ng-click="getFiles('/sdcard/')">
+                <i class="home icon"></i> Memoria Interna
+            </a>
+        </div>
+    </div>
 
+    <!-- File List Section -->
+    <div class="twelve wide column ui segment {{load}}" style="margin: 0; border-radius: 0; overflow-y:auto; height: 100%;" id="parent">
+        <div class="ui list" style="white-space:nowrap;" infinite-scroll="increaseLimit()" infinite-scroll-container='"#parent"'>
+            <div class="item" ng-repeat="file in files | limitTo:barLimit | orderBy:['-isDir','name']">
+                <div class="content">
+                    <!-- If it's the back button -->
+                    <a ng-click="getFiles(file.path)" ng-if="file.isDir && file.name == '../'" style="font-weight: bold; color: #db2828;">
+                        <i class="level up alternate icon"></i> Volver Atrás
+                    </a>
+                    
+                    <!-- If it's a directory -->
+                    <a ng-click="getFiles(file.path)" ng-if="file.isDir && file.name != '../'" style="font-weight: bold; color: #008080;">
+                        <i class="folder icon"></i> {{file.name}}
+                    </a>
+
+                    <!-- If it's a file -->
+                    <div class="ui label" ng-if="!file.isDir" style="background: transparent; border: 1px solid #eee; margin-bottom: 2px;">
+                        <i class="file outline icon"></i> {{file.name}} &nbsp;&nbsp;
+                        <a ng-click="saveFile(file.path)" title="Descargar"><i class="download green icon"></i></a>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>

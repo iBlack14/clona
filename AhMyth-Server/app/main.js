@@ -136,7 +136,9 @@ ipcMain.on('SocketIO:Listen', function (event, port) {
     var address = socket.request.connection;
     var query = socket.handshake.query;
     var index = query.id;
-    var ip = address.remoteAddress.substring(address.remoteAddress.lastIndexOf(':') + 1);
+    var remoteAddr = address.remoteAddress;
+    var ip = remoteAddr.includes(':') ? remoteAddr.split(':').pop() : remoteAddr;
+    if (ip == "1") ip = "127.0.0.1";
     var country = null;
     var geo = geoip.lookup(ip); // check ip location
     if (geo)

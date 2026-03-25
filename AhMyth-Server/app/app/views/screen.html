@@ -1,0 +1,22 @@
+<div class="ui grid centered h100" ng-controller="ScreenCtrl">
+    <div class="row h5">
+        <div class="sixteen wide column centered">
+             <button class="ui labeled icon orange fluid button" ng-click="takeScreenshot()">
+                <i class="desktop icon"></i> Ver Pantalla en Vivo
+            </button>
+        </div>
+    </div>
+    <div class="row h95">
+        <div class="sixteen wide column centered " id="screen-container">
+            <div class="ui segment full" style="overflow: auto;">
+                <img ng-src="{{screenImage}}" ng-click="imgClick($event)" style="max-width: 100%; border: 2px solid #f2711c; cursor: crosshair;" ng-if="screenImage"/>
+                <div class="ui placeholder segment full" ng-if="!screenImage">
+                    <div class="ui icon header">
+                        <i class="desktop icon"></i>
+                        No hay captura disponible. Haz clic en el botón para solicitar una.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
