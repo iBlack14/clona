@@ -1,4 +1,4 @@
-FROM node:18-focal
+FROM node:18
 
 # Instalamos dependencias del sistema y entorno gráfico mínimo
 ENV DEBIAN_FRONTEND=noninteractive
