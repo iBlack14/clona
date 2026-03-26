@@ -22,8 +22,8 @@ RUN npm install -g electron@9.2.0
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-# Puerto 8080: Para ver el panel en el navegador (noVNC)
+# Puerto 9000: Para ver el panel en el navegador (noVNC)
 # Puerto 42474: Para recibir conexiones de los celulares
-EXPOSE 8080 42474
+EXPOSE 9000 42474
 
 CMD ["/entrypoint.sh"]

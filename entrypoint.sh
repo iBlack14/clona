@@ -9,8 +9,8 @@ fluxbox &
 # 3. Iniciar servidor VNC (Contraseña: clona123)
 x11vnc -display :99 -forever -passwd "clona123" -listen localhost &
 
-# 4. Iniciar bridge para ver en el navegador (Puerto 8080)
-/usr/share/novnc/utils/novnc_proxy --vnc localhost:5900 --listen 8080 &
+# 4. Iniciar bridge para ver en el navegador (Puerto 9000)
+/usr/share/novnc/utils/novnc_proxy --vnc localhost:5900 --listen 9000 &
 
 # 5. Iniciar el servidor de AhMyth
 echo "Iniciando AhMyth Server..."
