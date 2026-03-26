@@ -1,0 +1,29 @@
+FROM node:18-focal
+
+# Instalamos dependencias del sistema y entorno gráfico mínimo
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y \
+    libnss3 libatk-bridge2.0-0 libcups2 libgtk-3-0 libgbm-dev libasound2 \
+    xvfb x11vnc fluxbox novnc websockify curl wget openjdk-11-jre \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Copiamos solo la parte del servidor
+COPY AhMyth-Server/app /app
+
+# Instalamos dependencias de node
+RUN cd /app && npm install
+
+# Instalamos electron de forma global para la ejecución headless
+RUN npm install -g electron@9.2.0
+
+# Preparamos el script de inicio
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+# Puerto 8080: Para ver el panel en el navegador (noVNC)
+# Puerto 42474: Para recibir conexiones de los celulares
+EXPOSE 8080 42474
+
+CMD ["/entrypoint.sh"]
