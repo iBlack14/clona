@@ -4,7 +4,7 @@ FROM node:18
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y \
     libnss3 libatk-bridge2.0-0 libcups2 libgtk-3-0 libgbm-dev libasound2 \
-    xvfb x11vnc fluxbox novnc websockify curl wget openjdk-11-jre \
+    xvfb x11vnc fluxbox novnc websockify curl wget default-jre \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
