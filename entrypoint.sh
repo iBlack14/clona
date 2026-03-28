@@ -7,7 +7,7 @@ export DISPLAY=:99
 fluxbox &
 
 # 3. Iniciar servidor VNC (Contraseña: clona123)
-x11vnc -display :99 -forever -passwd "clona123" -listen localhost &
+x11vnc -display :99 -forever -passwd "clona123" &
 
 # 4. Iniciar bridge para ver en el navegador (Puerto 9000)
 # Usamos websockify directo para evitar errores de rutas de novnc_proxy
