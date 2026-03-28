@@ -10,6 +10,7 @@ fluxbox &
 x11vnc -display :99 -forever -passwd "clona123" -listen localhost &
 
 # 4. Iniciar bridge para ver en el navegador (Puerto 9000)
+# Usamos websockify directo para evitar errores de rutas de novnc_proxy
 websockify --web /usr/share/novnc 9000 localhost:5900 &
 
 # 5. Iniciar el servidor de AhMyth

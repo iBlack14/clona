@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 
 # Cache buster para forzar rebuild
-ARG CACHEBUST=3
+ARG CACHEBUST=4
 
 # Copiamos solo la parte del servidor
 COPY AhMyth-Server/app /app
