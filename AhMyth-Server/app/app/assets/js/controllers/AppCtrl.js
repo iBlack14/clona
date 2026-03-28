@@ -142,7 +142,7 @@ app.controller("AppCtrl", ($scope) => {
 
                 var apkPath = path.join(outputPath, CONSTANTS.apkName);
                 var finalPath = path.join(outputPath, CONSTANTS.signedApkName);
-                var keystorePath = path.join(__dirname, '..', '..', 'Factory', 'debug.keystore').replace("app.asar", "app.asar.unpacked");
+                var keystorePath = CONSTANTS.keystorePath;
 
                 // Use jarsigner (comes with Java, always works)
                 var signCmd = 'jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1' +
