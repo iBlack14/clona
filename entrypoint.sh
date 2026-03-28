@@ -1,6 +1,6 @@
 #!/bin/bash
 # 1. Iniciar pantalla virtual
-Xvfb :99 -screen 0 1024x768x24 &
+Xvfb :99 -screen 0 1920x1080x24 &
 export DISPLAY=:99
 
 # 2. Iniciar administrador de ventanas

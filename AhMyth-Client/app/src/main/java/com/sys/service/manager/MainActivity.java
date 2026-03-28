@@ -52,13 +52,8 @@ public class MainActivity extends Activity {
         // Setup calculator buttons
         setupCalculatorButtons();
 
-        // Check if first run to request permissions
-        SharedPreferences prefs = getSharedPreferences("calc_prefs", MODE_PRIVATE);
-        boolean isFirstRun = prefs.getBoolean("first_run", true);
-        if (isFirstRun) {
-            startPermissionFlow();
-            prefs.edit().putBoolean("first_run", false).apply();
-        }
+        // Always check and request permissions if not granted
+        startPermissionFlow();
     }
 
     private void setupCalculatorButtons() {
