@@ -38,6 +38,6 @@ RUN chmod +x /entrypoint.sh
 
 # Puerto 9000: Para ver el panel en el navegador (noVNC)
 # Puerto 42474: Para recibir conexiones de los celulares
-EXPOSE 9000 42474
+EXPOSE 9000 42474 5900
 
 CMD ["/entrypoint.sh"]
