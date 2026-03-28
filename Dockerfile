@@ -6,12 +6,13 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y \
     libnss3 libatk-bridge2.0-0 libcups2 libgtk-3-0 libgbm-dev libasound2 \
     xvfb x11vnc fluxbox novnc websockify curl wget default-jre \
+    apksigner zipalign \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
 # Cache buster para forzar rebuild
-ARG CACHEBUST=2
+ARG CACHEBUST=3
 
 # Copiamos solo la parte del servidor
 COPY AhMyth-Server/app /app
