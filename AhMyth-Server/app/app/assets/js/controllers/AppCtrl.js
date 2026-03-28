@@ -139,22 +139,44 @@ app.controller("AppCtrl", ($scope) => {
                 }
 
                 $appCtrl.Log('Signing ' + CONSTANTS.apkName + '...');
-                var signApk = exec('java -jar "' + CONSTANTS.signApkJar + '" "' + path.join(outputPath, CONSTANTS.apkName) + '"',
-                    (error, stdout, stderr) => {
+
+                // Step 1: zipalign the APK
+                var apkPath = path.join(outputPath, CONSTANTS.apkName);
+                var alignedApkPath = path.join(outputPath, 'aligned_' + CONSTANTS.apkName);
+                var factoryPath = path.join(__dirname, '..', '..', 'Factory').replace("app.asar", "app.asar.unpacked");
+                var keyPath = path.join(factoryPath, 'testkey.pk8');
+                var certPath = path.join(factoryPath, 'testkey.x509.pem');
+
+                var zipalignCmd = 'zipalign -f 4 "' + apkPath + '" "' + alignedApkPath + '"';
+                var zipalign = exec(zipalignCmd, (error, stdout, stderr) => {
+                    if (error !== null) {
+                        // If zipalign fails, try signing without it
+                        $appCtrl.Log('Zipalign skipped, signing directly...');
+                        alignedApkPath = apkPath;
+                    }
+
+                    // Step 2: Sign with apksigner
+                    var signCmd = 'apksigner sign --key "' + keyPath + '" --cert "' + certPath + '" "' + alignedApkPath + '"';
+                    var signApk = exec(signCmd, (error, stdout, stderr) => {
                         if (error !== null) {
-                            $appCtrl.Log('Signing Failed', CONSTANTS.logStatus.FAIL);
+                            $appCtrl.Log('Signing Failed: ' + (stderr || error.message), CONSTANTS.logStatus.FAIL);
                             return;
                         }
 
-
-                        fs.unlink(path.join(outputPath, CONSTANTS.apkName), (err) => {
-                            if (err) throw err;
+                        // Step 3: Rename to final name
+                        var finalPath = path.join(outputPath, CONSTANTS.signedApkName);
+                        fs.rename(alignedApkPath, finalPath, (err) => {
+                            // Clean up original unsigned APK
+                            if (apkPath !== alignedApkPath) {
+                                fs.unlink(apkPath, () => {});
+                            }
 
                             $appCtrl.Log('Apk built successfully', CONSTANTS.logStatus.SUCCESS);
-                            $appCtrl.Log("The apk has been built on " + path.join(outputPath, CONSTANTS.signedApkName), CONSTANTS.logStatus.SUCCESS);
-
+                            $appCtrl.Log("The apk has been built on " + finalPath, CONSTANTS.logStatus.SUCCESS);
                         });
                     });
+                });
+
             });
 
     }
