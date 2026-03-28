@@ -6,18 +6,21 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y \
     libnss3 libatk-bridge2.0-0 libcups2 libgtk-3-0 libgbm-dev libasound2 \
     xvfb x11vnc fluxbox websockify curl wget default-jre \
-    apksigner zipalign \
+    apksigner zipalign zlib1g-dev \
     && rm -rf /var/lib/apt/lists/* \
     && mkdir -p /usr/share/novnc \
-    && wget -qO- https://github.com/novnc/noVNC/archive/v1.2.0.tar.gz | tar xz --strip-components=1 -C /usr/share/novnc
+    && wget -qO- https://github.com/novnc/noVNC/archive/v1.2.0.tar.gz | tar xz --strip-components=1 -C /usr/share/novnc \
+    && ln -sf /usr/bin/apksigner /usr/local/bin/apksigner \
+    && ln -sf /usr/bin/zipalign /usr/local/bin/zipalign
 
 WORKDIR /app
 
 # Cache buster para forzar rebuild
-ARG CACHEBUST=5
+ARG CACHEBUST=6
 
 # Copiamos solo la parte del servidor
 COPY AhMyth-Server/app /app
+RUN chmod -R 777 /app
 
 # Instalamos dependencias de node
 RUN cd /app && npm install
