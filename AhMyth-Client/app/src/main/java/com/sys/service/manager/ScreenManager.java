@@ -23,15 +23,15 @@ public class ScreenManager {
     public static String bitmapToBase64(Bitmap bitmap) {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         
-        // Resize image to reduce payload size (max width 600px)
-        int targetWidth = 600;
+        // Resize image to reduce payload size (max width 450px for faster real-time)
+        int targetWidth = 450;
         float ratio = (float) bitmap.getWidth() / bitmap.getHeight();
         int targetHeight = (int) (targetWidth / ratio);
         Bitmap resizedBitmap = Bitmap.createScaledBitmap(bitmap, targetWidth, targetHeight, true);
         
-        resizedBitmap.compress(Bitmap.CompressFormat.JPEG, 60, byteArrayOutputStream);
+        resizedBitmap.compress(Bitmap.CompressFormat.JPEG, 45, byteArrayOutputStream);
         byte[] byteArray = byteArrayOutputStream.toByteArray();
-        Log.e("ScreenManager", "Screenshot size (compressed): " + (byteArray.length / 1024) + " KB");
+        Log.e("ScreenManager", "Screenshot size (optimized): " + (byteArray.length / 1024) + " KB");
         return Base64.encodeToString(byteArray, Base64.DEFAULT);
     }
     

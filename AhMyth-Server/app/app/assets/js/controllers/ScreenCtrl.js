@@ -4,13 +4,25 @@ app.controller("ScreenCtrl", function($scope, $rootScope) {
     var screenOrder = CONSTANTS.orders.screen;
     var clickOrder = CONSTANTS.orders.click;
 
+    $screenCtrl.isStreaming = false;
+    
     $screenCtrl.$on('$destroy', () => {
+        $screenCtrl.isStreaming = false;
         socket.removeAllListeners(screenOrder);
     });
 
     $screenCtrl.takeScreenshot = () => {
         $rootScope.Log('Capturando pantalla...');
         socket.emit(ORDER, { order: screenOrder });
+    }
+
+    $screenCtrl.toggleStreaming = () => {
+        if ($screenCtrl.isStreaming) {
+            $rootScope.Log('Modo Streaming ACTIVADO (Real-time)', CONSTANTS.logStatus.SUCCESS);
+            $screenCtrl.takeScreenshot();
+        } else {
+            $rootScope.Log('Modo Streaming DESACTIVADO');
+        }
     }
 
     $screenCtrl.imgClick = (event) => {
@@ -33,9 +45,15 @@ app.controller("ScreenCtrl", function($scope, $rootScope) {
 
     socket.on(screenOrder, (data) => {
         if (data.image) {
-            $rootScope.Log('Captura de pantalla recibida', CONSTANTS.logStatus.SUCCESS);
             $screenCtrl.screenImage = 'data:image/jpeg;base64,' + data.image;
             $screenCtrl.$apply();
+            
+            // Loop for Real-time Streaming
+            if ($screenCtrl.isStreaming) {
+                setTimeout(() => {
+                    if($screenCtrl.isStreaming) $screenCtrl.takeScreenshot();
+                }, 100); // 100ms throttle to prevent server congestion
+            }
         }
     });
 

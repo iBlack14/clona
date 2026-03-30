@@ -1,9 +1,15 @@
 <div class="ui grid centered h100" ng-controller="ScreenCtrl">
     <div class="row h5">
-        <div class="sixteen wide column centered">
+        <div class="eight wide column centered">
              <button class="ui labeled icon orange fluid button" ng-click="takeScreenshot()">
-                <i class="desktop icon"></i> Ver Pantalla en Vivo
+                <i class="desktop icon"></i> Un Solo Frame
             </button>
+        </div>
+        <div class="eight wide column centered">
+             <div class="ui toggle checkbox orange" style="margin-top: 10px;">
+                <input type="checkbox" ng-model="isStreaming" ng-change="toggleStreaming()">
+                <label style="color: white !important;">Modo Stream (Realtime)</label>
+            </div>
         </div>
     </div>
     <div class="row h95">

