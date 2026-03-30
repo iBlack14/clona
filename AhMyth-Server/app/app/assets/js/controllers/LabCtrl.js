@@ -70,6 +70,11 @@ app.controller("LabCtrl", function($scope, $rootScope, $location) {
         window.close();
     };
 
+    $labCtrl.showLogs = false; // Oculto por defecto
+    $labCtrl.toggleLogs = () => {
+        $labCtrl.showLogs = !$labCtrl.showLogs;
+    };
+
 
     $rootScope.Log = (msg, status) => {
         var fontColor = CONSTANTS.logColors.DEFAULT;

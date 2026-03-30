@@ -37,13 +37,14 @@
 
 <body ng-controller="LabCtrl" class="draggable">
 
-    <div class="ui grid h80">
+    <div class="ui grid {{showLogs ? 'h80' : 'h100'}}">
         <div class="row h10">
             <div class="sixteen wide column">
                 <div class="ui inverted mini text labeled icon menu">
                     <a class="item">
                         <img src="assets/img/icon.png" /> </a>
                     <div class="right  menu notDraggable">
+                        <button class="ui circular violet button" ng-click="toggleLogs()" style="font-size: 6px;height: 17px" title="Ver/Ocultar Terminal"></button>
                         <button class="ui circular red button" ng-click="close()" style="font-size: 6px;height: 17px"></button>
                     </div>
                 </div>
@@ -99,7 +100,7 @@
 
 
     </div>
-    <div class="ui bottom attached black message h20 notDraggable " id="logy" style="overflow: scroll;">
+    <div class="ui bottom attached black message h20 notDraggable " id="logy" style="overflow: scroll;" ng-show="showLogs">
         <div ng-repeat="log in logs " class="log ">
             <div class="w30 " style="display: inline-block " ng-bind="log.date "></div>
             <div class="w65 " style="display: inline-block " ng-style="{ 'color':log.color} " ng-bind="log.msg "></div>

@@ -39,6 +39,11 @@ app.controller("AppCtrl", ($scope) => {
         window.minimize();
     };
 
+    $appCtrl.showLogs = false; // Oculto por defecto
+    $appCtrl.toggleLogs = () => {
+        $appCtrl.showLogs = !$appCtrl.showLogs;
+    };
+
     // when user clicks Listen button
     $appCtrl.Listen = (port) => {
         if (!port) {

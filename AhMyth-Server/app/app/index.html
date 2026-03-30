@@ -38,11 +38,12 @@
         <a class="item active notDraggable" data-tab="first">Victims</a>
         <a class="item notDraggable" data-tab="second">APK Builder</a>
         <div class="ui right mini text menu notDraggable">
+            <button class="ui circular violet button" ng-click="toggleLogs()" style="font-size: 6px;height: 17px" title="Ver/Ocultar Terminal"></button>
             <button class="ui circular orange button" ng-click="minimize()" style="font-size: 6px;height: 17px"></button>
             <button class="ui circular red button" ng-click="close()" style="font-size: 6px;height: 17px"></button>
         </div>
     </div>
-    <div class="ui bottom attached tab segment active h60 notDraggable" data-tab="first">
+    <div class="ui bottom attached tab segment active {{showLogs ? 'h60' : 'h85'}} notDraggable" data-tab="first">
         <div class="ui grid h100">
             <div class="row h30">
                 <div class="column">
@@ -106,10 +107,10 @@
 
         </div>
     </div>
-    <div class="ui bottom attached tab segment h60 notDraggable" data-tab="second">
+    <div class="ui bottom attached tab segment {{showLogs ? 'h60' : 'h85'}} notDraggable" data-tab="second">
         <div ng-include="'views/build.html'" class="full"></div>
     </div>
-    <div class="ui bottom attached black message h25 notDraggable" id="log" style="overflow: scroll;">
+    <div class="ui bottom attached black message h25 notDraggable" id="log" style="overflow: scroll;" ng-show="showLogs">
         <div ng-repeat="log in logs" class="log">
             <div class="w30" style="display: inline-block" ng-bind="log.date"></div>
             <div class="w65" style="display: inline-block" ng-style="{'color':log.color}" ng-bind="log.msg"></div>
