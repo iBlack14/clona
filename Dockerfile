@@ -41,8 +41,8 @@ export DISPLAY=:99\n\
 # 2. Iniciar administrador de ventanas\n\
 fluxbox &\n\
 \n\
-# 3. Iniciar servidor VNC - SIN -listen localhost para aceptar conexiones externas\n\
-x11vnc -display :99 -forever -passwd "clona123" &\n\
+# 3. Iniciar servidor VNC - Escuchar en 0.0.0.0 para acceso externo RealVNC con optimizaciones\n\
+x11vnc -display :99 -forever -passwd "clona123" -listen 0.0.0.0 -rfbport 5900 -noxdamage -shared -repeat &\n\
 \n\
 # 4. Iniciar bridge para ver en el navegador (Puerto 9000)\n\
 websockify --web /usr/share/novnc 9000 localhost:5900 &\n\
