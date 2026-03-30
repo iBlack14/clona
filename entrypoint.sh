@@ -2,18 +2,16 @@
 # 1. Iniciar pantalla virtual
 Xvfb :99 -screen 0 1920x1080x24 &
 export DISPLAY=:99
+sleep 2
 
 # 2. Iniciar administrador de ventanas
 fluxbox &
+sleep 1
 
-# 3. Iniciar servidor VNC - Escuchar en 0.0.0.0 para acceso externo RealVNC
-# Usamos -shared, -noxdamage y -repeat para mejor fluidez
-x11vnc -display :99 -forever -passwd "clona123" -listen 0.0.0.0 -rfbport 5900 -noxdamage -shared -repeat &
+# 3. Iniciar servidor VNC exclusivo para acceso RealVNC Directo (Puerto 5900)
+# Usamos -shared, -noxdamage y -repeat para máxima fluidez
+x11vnc -display :99 -forever -passwd "clona123" -rfbport 5900 -shared -noxdamage -repeat &
 
-# 4. Iniciar bridge para ver en el navegador (Puerto 9000)
-# Usamos websockify directo para evitar errores de rutas de novnc_proxy
-websockify --web /usr/share/novnc 9000 localhost:5900 &
-
-# 5. Iniciar el servidor de AhMyth
-echo "Iniciando AhMyth Server..."
+# 4. Iniciar el servidor de AhMyth
+echo "Iniciando Clona Server..."
 electron /app --no-sandbox

