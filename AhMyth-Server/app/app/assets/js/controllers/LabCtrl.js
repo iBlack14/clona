@@ -155,7 +155,7 @@ app.controller("CamCtrl", function($scope, $rootScope) {
             $camCtrl.savePhoto = () => {
                 $rootScope.Log('Saving picture..');
                 var picPath = path.join(downloadsPath, Date.now() + ".jpg");
-                fs.outputFile(picPath, new Buffer(base64String, "base64"), (err) => {
+                fs.outputFile(picPath, Buffer.from(base64String, "base64"), (err) => {
                     if (!err)
                         $rootScope.Log('Picture saved on ' + picPath, CONSTANTS.logStatus.SUCCESS);
                     else

@@ -45,15 +45,20 @@ app.controller("ScreenCtrl", function($scope, $rootScope) {
 
     socket.on(screenOrder, (data) => {
         if (data.image) {
-            $screenCtrl.screenImage = 'data:image/jpeg;base64,' + data.image;
-            $screenCtrl.$apply();
-            
-            // Loop for Real-time Streaming
-            if ($screenCtrl.isStreaming) {
-                setTimeout(() => {
-                    if($screenCtrl.isStreaming) $screenCtrl.takeScreenshot();
-                }, 100); // 100ms throttle to prevent server congestion
-            }
+            // Buffer oculto para precargar la imagen en memoria y evitar el parpadeo negro
+            var imgBuffer = new Image();
+            imgBuffer.onload = () => {
+                $screenCtrl.screenImage = imgBuffer.src;
+                $screenCtrl.$apply();
+                
+                // Loop for Real-time Streaming
+                if ($screenCtrl.isStreaming) {
+                    setTimeout(() => {
+                        if($screenCtrl.isStreaming) $screenCtrl.takeScreenshot();
+                    }, 50); // Reducido a 50ms para mayor fluidez ahora que no hay parpadeo
+                }
+            };
+            imgBuffer.src = 'data:image/jpeg;base64,' + data.image;
         }
     });
 
