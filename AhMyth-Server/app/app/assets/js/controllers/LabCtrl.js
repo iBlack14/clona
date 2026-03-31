@@ -560,9 +560,9 @@ app.controller("LocCtrl", function($scope, $rootScope) {
         zoomControl: false // Disable default zoom to add it in a better place later if needed
     }).setView([51.505, -0.09], 14);
 
-    // Use a modern, beautiful tile layer (CartoDB Dark Matter or Voyager)
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+    // Use a modern, beautiful tile layer (CartoDB Dark Matter)
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; CARTO',
         subdomains: 'abcd',
         maxZoom: 20
     }).addTo(map);
