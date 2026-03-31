@@ -1,5 +1,5 @@
 <div class="ui grid centered h100" ng-controller="ScreenCtrl">
-    <div class="row h5">
+    <div class="row h10">
         <div class="eight wide column centered">
              <button class="ui labeled icon orange fluid button" ng-click="takeScreenshot()">
                 <i class="desktop icon"></i> Un Solo Frame
@@ -12,10 +12,10 @@
             </div>
         </div>
     </div>
-    <div class="row h95">
-        <div class="sixteen wide column centered " id="screen-container">
-            <div class="ui segment full" style="overflow: auto;">
-                <img ng-src="{{screenImage}}" ng-click="imgClick($event)" style="max-width: 100%; border: 2px solid #f2711c; cursor: crosshair;" ng-if="screenImage"/>
+    <div class="row h90">
+        <div class="sixteen wide column centered" id="screen-container">
+            <div class="ui segment segment-full" style="display: flex; justify-content: center; align-items: center; background: #1b1c1d; overflow: hidden;">
+                <img ng-src="{{screenImage}}" ng-click="imgClick($event)" style="max-width: 100%; max-height: 100%; object-fit: contain; border: 2px solid #f2711c; cursor: crosshair; box-shadow: 0 0 15px rgba(242, 113, 28, 0.3);" ng-if="screenImage"/>
                 <div class="ui placeholder segment full" ng-if="!screenImage">
                     <div class="ui icon header">
                         <i class="desktop icon"></i>

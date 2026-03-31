@@ -188,11 +188,11 @@ ipcMain.on('openLabWindow', function (e, page, index) {
   let child = new BrowserWindow({
     icon: __dirname + '/app/assets/img/icon.png',
     parent: win,
-    width: 600,
-    height: 650,
+    width: 800,
+    height: 850,
     darkTheme: true,
     transparent: true,
-    resizable: false,
+    resizable: true,
     frame: false,
     webPreferences: {
       nodeIntegration: true
