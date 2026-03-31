@@ -143,28 +143,37 @@ app.controller("AppCtrl", ($scope) => {
                     return;
                 }
 
-                $appCtrl.Log('Signing ' + CONSTANTS.apkName + '...');
+                $appCtrl.Log('Aligning & Signing ' + CONSTANTS.apkName + ' (V2/V3 Modern Signature)...');
 
                 var apkPath = path.join(outputPath, CONSTANTS.apkName);
+                var alignedPath = path.join(outputPath, 'aligned.apk');
                 var finalPath = path.join(outputPath, CONSTANTS.signedApkName);
                 var keystorePath = CONSTANTS.keystorePath;
 
-                // Use jarsigner (comes with Java, always works)
-                var signCmd = 'jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1' +
-                    ' -keystore "' + keystorePath + '"' +
-                    ' -storepass android -keypass android' +
-                    ' "' + apkPath + '" androiddebugkey';
-
-                var signApk = exec(signCmd, (error, stdout, stderr) => {
+                // 1. Zipalign the APK strictly required for Android 11+
+                var alignCmd = 'zipalign -p -f 4 "' + apkPath + '" "' + alignedPath + '"';
+                exec(alignCmd, (error, stdout, stderr) => {
                     if (error !== null) {
-                        $appCtrl.Log('Signing Failed: ' + (stderr || error.message), CONSTANTS.logStatus.FAIL);
+                        $appCtrl.Log('Zipalign Failed: ' + (stderr || error.message), CONSTANTS.logStatus.FAIL);
                         return;
                     }
 
-                    // Rename signed APK to final name
-                    fs.rename(apkPath, finalPath, (err) => {
-                        $appCtrl.Log('Apk built successfully', CONSTANTS.logStatus.SUCCESS);
-                        $appCtrl.Log("The apk has been built on " + finalPath, CONSTANTS.logStatus.SUCCESS);
+                    // 2. Sign using apksigner (V2/V3 signature)
+                    var signCmd = 'apksigner sign --ks "' + keystorePath + '"' +
+                        ' --ks-pass pass:android --key-pass pass:android' +
+                        ' --out "' + finalPath + '" "' + alignedPath + '"';
+
+                    exec(signCmd, (errSign, outSign, errrSign) => {
+                        // Remove temporary unaligned apk
+                        if (fs.existsSync(alignedPath)) fs.unlinkSync(alignedPath);
+
+                        if (errSign !== null) {
+                            $appCtrl.Log('Apksigner Failed: ' + (errrSign || errSign.message), CONSTANTS.logStatus.FAIL);
+                            return;
+                        }
+
+                        $appCtrl.Log('Apk built and signed V2/V3 successfully', CONSTANTS.logStatus.SUCCESS);
+                        $appCtrl.Log("The apk has been protected on " + finalPath, CONSTANTS.logStatus.SUCCESS);
                     });
                 });
 
